@@ -6,7 +6,8 @@ import {
   buildOrbitVisualization,
   calculateDerived,
   clampOrbitState,
-  ELEMENT_LIMITS
+  ELEMENT_LIMITS,
+  getAnimationSpeedLimit
 } from './orbitMath.js';
 import { dictionaries, SUPPORTED_LANGUAGES } from './i18n.js';
 
@@ -26,8 +27,8 @@ const defaultState = clampOrbitState({
   showPerigeeVector: true,
   showVelocityVector: true,
   animationPlaying: false,
-  animationMode: ANIMATION_MODES.fixed.id,
-  animationSpeed: 1,
+  animationMode: ANIMATION_MODES.kepler.id,
+  animationSpeed: 600,
   language: 'en',
   activeParameter: null,
   selectedPreset: null
@@ -62,13 +63,21 @@ function createOrbitStore() {
         })
       ),
     setAnimationMode: (mode) =>
-      update((state) =>
-        clampOrbitState({
+      update((state) => {
+        const nextMode = ANIMATION_MODES[mode]?.id ?? ANIMATION_MODES.fixed.id;
+        const nextLimit = getAnimationSpeedLimit(nextMode);
+        const nextSpeed =
+          nextMode === ANIMATION_MODES.kepler.id
+            ? 600
+            : Math.min(nextLimit.max, Math.max(nextLimit.min, state.animationSpeed));
+
+        return clampOrbitState({
           ...state,
-          animationMode: mode,
+          animationMode: nextMode,
+          animationSpeed: nextSpeed,
           activeParameter: 'trueAnomalyDeg'
-        })
-      ),
+        });
+      }),
     toggleLayer: (key) => update((state) => ({ ...state, [key]: !state[key] })),
     setLayer: (key, value) => update((state) => ({ ...state, [key]: Boolean(value) })),
     setAnimationSpeed: (rawValue) =>
@@ -130,3 +139,4 @@ export const orbitVisualization = derived(orbitState, ($orbitState) =>
 export { ELEMENT_LIMITS };
 export { ANIMATION_MODES };
 export { SUPPORTED_LANGUAGES };
+export { getAnimationSpeedLimit };

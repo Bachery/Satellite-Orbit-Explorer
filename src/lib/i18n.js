@@ -66,7 +66,7 @@ export const dictionaries = {
         },
         kepler: {
           label: '两体速度',
-          description: '两体快慢 + 600x 时间压缩，非真实时钟。'
+          description: '两体快慢；滑块为 1–1000x 时间压缩。'
         }
       },
       play: 'Play',
@@ -74,7 +74,7 @@ export const dictionaries = {
       reset: 'Reset ν',
       speed: '速度',
       formula: 'v = √(μ(2/r − 1/a))',
-      formulaNote: '位置按开普勒方程推进；播放时间使用 600x 压缩。'
+      formulaNote: '位置按开普勒方程推进；滑块值就是相对真实时钟的压缩倍率。'
     },
     layers: {
       heading: '图层',
@@ -231,7 +231,7 @@ export const dictionaries = {
         },
         kepler: {
           label: 'Two-body speed',
-          description: 'Two-body pacing + 600x time compression, not real clock time.'
+          description: 'Two-body pacing; the slider is 1–1000x time compression.'
         }
       },
       play: 'Play',
@@ -239,7 +239,7 @@ export const dictionaries = {
       reset: 'Reset ν',
       speed: 'Speed',
       formula: 'v = √(μ(2/r − 1/a))',
-      formulaNote: 'Position is advanced with Kepler’s equation; playback uses 600x time compression.'
+      formulaNote: 'Position is advanced with Kepler’s equation; the slider value is the time-compression factor.'
     },
     layers: {
       heading: 'Layers',

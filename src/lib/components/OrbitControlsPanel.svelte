@@ -1,5 +1,11 @@
 <script>
-  import { ANIMATION_MODES, ELEMENT_LIMITS, orbitState, uiText } from '../stores.js';
+  import {
+    ANIMATION_MODES,
+    ELEMENT_LIMITS,
+    getAnimationSpeedLimit,
+    orbitState,
+    uiText
+  } from '../stores.js';
 
   const parameterControls = [
     { key: 'a' },
@@ -31,6 +37,9 @@
   function updateParameter(key, event) {
     orbitState.setParameter(key, event.currentTarget.value);
   }
+
+  $: animationSpeedLimit = getAnimationSpeedLimit($orbitState.animationMode);
+  $: animationSpeedText = Number($orbitState.animationSpeed).toFixed(animationSpeedLimit.decimals);
 </script>
 
 <div class="control-stack">
@@ -122,12 +131,12 @@
     </div>
 
     <label class="speed-control">
-      <span>{$uiText.animation.speed} {$orbitState.animationSpeed.toFixed(1)}x</span>
+      <span>{$uiText.animation.speed} {animationSpeedText}x</span>
       <input
         type="range"
-        min={ELEMENT_LIMITS.animationSpeed.min}
-        max={ELEMENT_LIMITS.animationSpeed.max}
-        step={ELEMENT_LIMITS.animationSpeed.step}
+        min={animationSpeedLimit.min}
+        max={animationSpeedLimit.max}
+        step={animationSpeedLimit.step}
         value={$orbitState.animationSpeed}
         on:input={(event) => orbitState.setAnimationSpeed(event.currentTarget.value)}
       />

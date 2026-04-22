@@ -3,7 +3,6 @@ export const EARTH_MU_KM3_S2 = 398600.4418;
 export const DEG_TO_RAD = Math.PI / 180;
 export const RAD_TO_DEG = 180 / Math.PI;
 export const FIXED_ANGULAR_RATE_DEG_S = 10;
-export const KEPLER_ANIMATION_TIME_SCALE = 600;
 
 export const ANIMATION_MODES = {
   fixed: {
@@ -21,8 +20,15 @@ export const ELEMENT_LIMITS = {
   raanDeg: { min: 0, max: 360, step: 0.1, unit: 'deg', decimals: 1 },
   argPerigeeDeg: { min: 0, max: 360, step: 0.1, unit: 'deg', decimals: 1 },
   trueAnomalyDeg: { min: 0, max: 360, step: 0.1, unit: 'deg', decimals: 1 },
-  animationSpeed: { min: 0.1, max: 12, step: 0.1, unit: 'x', decimals: 1 }
+  animationSpeed: { min: 0.1, max: 12, step: 0.1, unit: 'x', decimals: 1 },
+  keplerAnimationSpeed: { min: 1, max: 1000, step: 1, unit: 'x', decimals: 0 }
 };
+
+export function getAnimationSpeedLimit(animationMode) {
+  return animationMode === ANIMATION_MODES.kepler.id
+    ? ELEMENT_LIMITS.keplerAnimationSpeed
+    : ELEMENT_LIMITS.animationSpeed;
+}
 
 export function clamp(value, min, max) {
   return Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
@@ -47,6 +53,9 @@ export function radToDeg(rad) {
 }
 
 export function clampOrbitState(state) {
+  const animationMode = ANIMATION_MODES[state.animationMode]?.id ?? ANIMATION_MODES.fixed.id;
+  const animationSpeedLimit = getAnimationSpeedLimit(animationMode);
+
   return {
     ...state,
     a: clamp(Number(state.a), ELEMENT_LIMITS.a.min, ELEMENT_LIMITS.a.max),
@@ -56,11 +65,11 @@ export function clampOrbitState(state) {
     argPerigeeDeg: normalizeAngleDeg(Number(state.argPerigeeDeg)),
     trueAnomalyDeg: normalizeAngleDeg(Number(state.trueAnomalyDeg)),
     language: state.language === 'zh' ? 'zh' : 'en',
-    animationMode: ANIMATION_MODES[state.animationMode]?.id ?? ANIMATION_MODES.fixed.id,
+    animationMode,
     animationSpeed: clamp(
       Number(state.animationSpeed),
-      ELEMENT_LIMITS.animationSpeed.min,
-      ELEMENT_LIMITS.animationSpeed.max
+      animationSpeedLimit.min,
+      animationSpeedLimit.max
     )
   };
 }
@@ -159,8 +168,7 @@ export function advanceTrueAnomalyFixed(trueAnomalyDeg, deltaSeconds, animationS
 export function advanceTrueAnomalyKepler(elements, deltaSeconds, animationSpeed) {
   const currentMeanAnomaly = getMeanAnomalyFromTrueAnomaly(elements);
   const nextMeanAnomaly =
-    currentMeanAnomaly +
-    getMeanMotionRadS(elements) * deltaSeconds * animationSpeed * KEPLER_ANIMATION_TIME_SCALE;
+    currentMeanAnomaly + getMeanMotionRadS(elements) * deltaSeconds * animationSpeed;
   return getTrueAnomalyFromMeanAnomaly(elements.e, nextMeanAnomaly);
 }
 
